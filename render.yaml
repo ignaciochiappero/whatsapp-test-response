@@ -1,0 +1,56 @@
+services:
+  # Base de datos PostgreSQL
+  - type: pserv
+    name: whatsapp-bot-db
+    env: docker
+    plan: free
+    region: oregon
+    
+  # Backend (API + WhatsApp Client)
+  - type: web
+    name: whatsapp-bot-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    region: oregon
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: whatsapp-bot-db
+          property: connectionString
+      - key: PORT
+        value: 3001
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        sync: false
+      - key: PUPPETEER_EXECUTABLE_PATH
+        value: /usr/bin/chromium-browser
+    disk:
+      name: whatsapp-data
+      mountPath: /app/.wwebjs_auth
+      sizeGB: 1
+    healthCheckPath: /api/status
+
+  # Frontend (React + Vite)
+  - type: web
+    name: whatsapp-bot-frontend
+    env: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    region: oregon
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+databases:
+  - name: whatsapp-bot-db
+    databaseName: whatsapp_bot
+    user: whatsapp_user
+    plan: free
+    region: oregon

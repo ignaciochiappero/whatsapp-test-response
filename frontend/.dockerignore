@@ -1,0 +1,25 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+
+# Build
+dist/
+build/
+
+# Env files (se crea en Dockerfile)
+.env.local
+.env.production.local
+
+# Testing
+coverage/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log

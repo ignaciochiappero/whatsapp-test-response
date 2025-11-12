@@ -1,0 +1,356 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #646cff;
+}
+
+header h1 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.status-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.status {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status.ready {
+  background-color: #22c55e;
+  color: white;
+}
+
+.status.qr {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.status.loading {
+  background-color: #6b7280;
+  color: white;
+}
+
+.qr-section {
+  text-align: center;
+  padding: 2rem;
+  background: #1a1a1a;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.qr-section h2 {
+  margin-bottom: 1.5rem;
+  color: #646cff;
+}
+
+.qr-section img {
+  margin: 1rem auto;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  display: block;
+}
+
+.qr-section p {
+  color: #888;
+  margin-top: 1rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #333;
+  flex-wrap: wrap;
+}
+
+.tabs button {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 1rem;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+}
+
+.tabs button:hover {
+  color: #646cff;
+}
+
+.tabs button.active {
+  color: #646cff;
+  border-bottom-color: #646cff;
+}
+
+.tab-content {
+  background: #1a1a1a;
+  border-radius: 12px;
+  padding: 2rem;
+  min-height: 400px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #646cff;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  background: #2a2a2a;
+  border: 2px solid #333;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.25rem;
+  color: #888;
+  font-size: 0.875rem;
+}
+
+button[type="submit"],
+.refresh-btn {
+  background: #646cff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button[type="submit"]:hover,
+.refresh-btn:hover {
+  background: #535bf2;
+}
+
+button[type="submit"]:disabled {
+  background: #4a4a4a;
+  cursor: not-allowed;
+}
+
+.refresh-btn {
+  margin-bottom: 1rem;
+}
+
+.messages-list,
+.contacts-list,
+.auto-replies-list {
+  margin-top: 1rem;
+}
+
+.message-item {
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #646cff;
+}
+
+.message-item.sent {
+  border-left-color: #22c55e;
+}
+
+.message-item.received {
+  border-left-color: #3b82f6;
+}
+
+.message-item.auto {
+  border-left-color: #f59e0b;
+}
+
+.message-header {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #888;
+  flex-wrap: wrap;
+}
+
+.message-header .contact {
+  color: #646cff;
+  font-weight: 600;
+}
+
+.message-header .type {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: #333;
+  border-radius: 4px;
+}
+
+.message-body {
+  color: white;
+  white-space: pre-wrap;
+}
+
+.contact-item {
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.contact-name {
+  font-weight: 600;
+  color: #646cff;
+}
+
+.contact-phone {
+  color: #888;
+}
+
+.contact-messages {
+  color: #888;
+  font-size: 0.875rem;
+}
+
+.add-auto-reply {
+  background: #2a2a2a;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.add-auto-reply h3 {
+  margin-bottom: 1rem;
+  color: #646cff;
+}
+
+.auto-reply-item {
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.auto-reply-item .trigger {
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+.auto-reply-item .response {
+  color: #888;
+  padding-left: 1rem;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background 0.3s;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+.send-section h2,
+.messages-section h2,
+.contacts-section h2,
+.auto-replies-section h2 {
+  margin-bottom: 1.5rem;
+  color: #646cff;
+}
+
+@media (max-width: 768px) {
+  .app {
+    padding: 1rem;
+  }
+  
+  .tabs {
+    overflow-x: auto;
+  }
+  
+  .tabs button {
+    white-space: nowrap;
+  }
+  
+  .message-header {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .contact-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

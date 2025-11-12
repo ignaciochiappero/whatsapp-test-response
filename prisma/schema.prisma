@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Contact {
+    id        String    @id @default(uuid())
+    phone     String    @unique
+    name      String?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    messages  Message[]
+}
+
+model Message {
+    id        String   @id @default(uuid())
+    contactId String
+    contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+    body      String
+    type      String // 'sent' | 'received' | 'auto'
+    status    String // 'pending' | 'sent' | 'failed'
+    sentAt    DateTime @default(now())
+    error     String?
+
+    @@index([contactId])
+    @@index([sentAt])
+}
+
+model AutoReply {
+    id        String   @id @default(uuid())
+    trigger   String   @unique
+    response  String
+    active    Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model SystemLog {
+    id        String   @id @default(uuid())
+    event     String
+    details   String?
+    createdAt DateTime @default(now())
+
+    @@index([createdAt])
+}

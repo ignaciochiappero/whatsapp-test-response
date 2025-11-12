@@ -1,0 +1,44 @@
+# Archivos de dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Variables de entorno (se copian manualmente en Dockerfile)
+.env.local
+.env.production.local
+.env.development.local
+.env.test.local
+
+# Sesión de WhatsApp
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Build outputs
+dist/
+build/
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Frontend directory (tiene su propio Dockerfile)
+frontend/
+
+# Docker
+*.env.docker
+
+# Git
+.git/
+.gitignore
+README.md
+DEPLOYMENT.md

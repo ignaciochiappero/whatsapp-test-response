@@ -1,0 +1,83 @@
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: whatsapp-bot-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: whatsapp_bot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - whatsapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend (API + WhatsApp Client)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whatsapp-bot-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/whatsapp_bot?schema=public
+      PORT: 3001
+      NODE_ENV: production
+      FRONTEND_URL: http://localhost:3000
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+    ports:
+      - "3001:3001"
+    volumes:
+      # Volumen para persistir la sesión de WhatsApp
+      - whatsapp_session:/app/.wwebjs_auth
+      - whatsapp_cache:/app/.wwebjs_cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - whatsapp-network
+    # Límite de recursos para evitar reinicios
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    # Asegurar que solo haya una instancia
+    scale: 1
+
+  # Frontend (React + Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: whatsapp-bot-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      VITE_API_URL: http://localhost:3001
+    depends_on:
+      - backend
+    networks:
+      - whatsapp-network
+
+volumes:
+  postgres_data:
+    driver: local
+  whatsapp_session:
+    driver: local
+  whatsapp_cache:
+    driver: local
+
+networks:
+  whatsapp-network:
+    driver: bridge

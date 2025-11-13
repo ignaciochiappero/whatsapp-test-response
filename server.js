@@ -29,10 +29,12 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Estado del cliente WhatsApp
@@ -43,25 +45,30 @@ let clientInfo = null;
 
 // Inicializar cliente WhatsApp
 function initializeWhatsAppClient() {
+  const puppeteerConfig = {
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--no-first-run",
+      "--no-zygote",
+      "--disable-gpu",
+      "--disable-software-rasterizer",
+    ],
+  };
+
+  // Solo agregar executablePath si está definido en .env (Docker/producción)
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    puppeteerConfig.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+
   whatsappClient = new Client({
     authStrategy: new LocalAuth({
       dataPath: ".wwebjs_auth",
     }),
-    puppeteer: {
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--no-zygote",
-        "--disable-gpu",
-        "--disable-software-rasterizer",
-      ],
-      executablePath:
-        process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium-browser",
-    },
+    puppeteer: puppeteerConfig,
   });
 
   whatsappClient.on("qr", async (qr) => {
@@ -142,6 +149,11 @@ function initializeWhatsAppClient() {
     console.log("💬 Mensaje:", message.body);
 
     try {
+      // Ignorar mensajes que no son de chat (estados, llamadas, etc)
+      if (!message.body || message.type !== "chat") {
+        return;
+      }
+
       // Guardar contacto si no existe
       const phoneNumber = message.from.split("@")[0];
       let contact = await prisma.contact.findUnique({
@@ -167,50 +179,60 @@ function initializeWhatsAppClient() {
         },
       });
 
-      // Auto-respuestas programadas (las originales)
-      if (message.body === "!ping") {
-        await whatsappClient.sendMessage(message.from, "pong");
-
-        await prisma.message.create({
-          data: {
-            contactId: contact.id,
-            body: "pong",
-            type: "auto",
-            status: "sent",
-          },
-        });
-      }
-
-      if (message.body === "!hola") {
-        const reply =
-          "¡Hola! ¿Cómo estás? este es un mensaje de un bot de Nacho automatizado 👁️👄👁️";
-        await message.reply(reply);
-
-        await prisma.message.create({
-          data: {
-            contactId: contact.id,
-            body: reply,
-            type: "auto",
-            status: "sent",
-          },
-        });
-      }
-
-      // Respuestas automáticas desde la base de datos
+      // Buscar si existe una auto-respuesta para este trigger
       const autoReplies = await prisma.autoReply.findMany({
         where: { active: true },
       });
 
+      let foundAutoReply = false;
       for (const autoReply of autoReplies) {
+        // Si el mensaje contiene el trigger Y NO es la respuesta misma (para evitar bucle)
         if (
-          message.body.toLowerCase().includes(autoReply.trigger.toLowerCase())
+          message.body
+            .toLowerCase()
+            .includes(autoReply.trigger.toLowerCase()) &&
+          message.body !== autoReply.response
         ) {
+          foundAutoReply = true;
           await message.reply(autoReply.response);
 
           await prisma.message.create({
             data: {
               contactId: contact.id,
               body: autoReply.response,
+              type: "auto",
+              status: "sent",
+            },
+          });
+
+          break; // Solo enviar UNA respuesta
+        }
+      }
+
+      // Auto-respuestas programadas fijas (solo si no se encontró una de BD)
+      if (!foundAutoReply) {
+        if (message.body === "!ping") {
+          await whatsappClient.sendMessage(message.from, "pong");
+
+          await prisma.message.create({
+            data: {
+              contactId: contact.id,
+              body: "pong",
+              type: "auto",
+              status: "sent",
+            },
+          });
+        }
+
+        if (message.body === "!hola") {
+          const reply =
+            "¡Hola! ¿Cómo estás? este es un mensaje de un bot de Nacho automatizado 👁️👄👁️";
+          await message.reply(reply);
+
+          await prisma.message.create({
+            data: {
+              contactId: contact.id,
+              body: reply,
               type: "auto",
               status: "sent",
             },
